@@ -1,0 +1,128 @@
+version: '3.7'
+
+services:
+  api:
+    container_name: api
+    build:
+      context: ./services/backend
+      args:
+        APP_USER: ${APP_USER}
+        APP_DIR: ${APP_DIR}
+    volumes:
+      - ./services/backend/src/api/:${APP_DIR}/api/
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+      - ./services/backend/src/ws/:${APP_DIR}/ws/
+      - ./services/backend/src/static/:${APP_DIR}/static/
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=0', '--', 'python3', 'manage.py', 'runserver', '0.0.0.0:8000']
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis:5-alpine
+    container_name: redis
+    volumes:
+      - ./services/backend/data/redis:/data
+    env_file: ./.env
+    ports:
+      - '6379:6379'
+
+  worker:
+    container_name: worker
+    image: monoapp_template_api
+    build:
+      context: ./services/backend
+    volumes:
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=0', '--', 'celery', '-A', 'config.celery', 'worker', '-Q', 'low']
+    depends_on:
+      - db
+      - redis
+
+  flower:
+    container_name: flower
+    image: monoapp_template_api
+    build:
+      context: ./services/backend
+    volumes:
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+    env_file: ./.env
+    entrypoint: []
+    command: ['celery', '-A', 'config.celery.celery', 'flower']
+    ports:
+      - '5555:5555'
+    depends_on:
+      - redis
+
+  beat:
+    container_name: beat
+    image: monoapp_template_api
+    build:
+      context: ./services/backend
+    volumes:
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=0', '--', 'celery', '-A', 'config.celery', 'beat', '-l', 'INFO', '--scheduler', 'django_celery_beat.schedulers:DatabaseScheduler']
+    depends_on:
+      - db
+      - redis
+
+  db:
+    container_name: db
+    image: postgres:12.1-alpine
+    shm_size: 2g
+    privileged: true
+    volumes:
+      - ./services/backend/data/postgres:/var/lib/postgresql/data
+      - ./services/backend/data/init:/docker-entrypoint-initdb.d
+    env_file: .env
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_PORT=${DATABASE_PORT}
+    ports:
+      - '5432:5432'
+
+  collectstatic:
+    container_name: collectstatic
+    image: monoapp_template_api
+    build:
+      context: ./services/backend
+    volumes:
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+      - ./services/backend/src/static/:${APP_DIR}/static/
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=0', '--', 'python3', 'manage.py', 'collectstatic', '--noinput']
+    depends_on:
+      - db
+      - redis
+
+  db-migrator:
+    container_name: db-migrator
+    image: monoapp_template_api
+    build:
+      context: ./services/backend
+    volumes:
+      - ./services/backend/src/apps/:${APP_DIR}/apps/
+      - ./services/backend/src/config/:${APP_DIR}/config/
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=0', '--', 'python3', 'manage.py', 'migrate']
+    depends_on:
+      - db
+      - redis
