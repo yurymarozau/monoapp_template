@@ -1,1 +1,1 @@
-# Template for mono application with Django.
+# Monoapp template

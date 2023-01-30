@@ -13,7 +13,7 @@ User = get_user_model()
 
 class JWTAuthMiddleware:
     """
-    Token authorization middleware for Django Channels 2
+    Token authorization middleware for Django Channels
     see:
     https://channels.readthedocs.io/en/latest/topics/authentication.html#custom-authentication
     """

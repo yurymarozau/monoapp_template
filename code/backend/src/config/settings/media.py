@@ -20,62 +20,18 @@ MEDIA_DIR = 'media'
 
 AWS_STATIC_LOCATION = 'static'
 if config('PUT_STATIC_TO_S3', default=False, cast=bool):
-    STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/'
+    STATIC_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/{AWS_STATIC_LOCATION}/"
     STATICFILES_STORAGE = 'config.storages.StaticStorage'
 
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    MEDIA_URL = f"https://{AWS_S3_CUSTOM_DOMAIN}/"
     DEFAULT_FILE_STORAGE = 'config.storages.MediaStorage'
 else:
-    STATIC_URL = f'/{STATIC_DIR}/'
+    STATIC_URL = f"/{STATIC_DIR}/"
     STATIC_ROOT = os.path.abspath(os.path.join(BASE_DIR, os.pardir, STATIC_DIR))
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
-    MEDIA_URL = f'/{MEDIA_DIR}/'
+    MEDIA_URL = f"/{MEDIA_DIR}/"
     MEDIA_ROOT = os.path.abspath(os.path.join(BASE_DIR, os.pardir, MEDIA_DIR))
 
-MAX_UPLOAD_SIZE = 26214400
-DATA_UPLOAD_MAX_NUMBER_FIELDS = 12000
-
-LOCALE_PATHS = (BASE_DIR + '/locale',)
-
 STATICFILES_DIRS = (
-)
-
-ALLOWED_FILE_FORMATS = (
-    '.doc',
-    '.docx',
-    '.xls',
-    '.xlsx',
-    '.ppt',
-    '.pptx',
-    '.pdf',
-    '.png',
-    '.jpg',
-    '.jpeg',
-    '.jpe',
-    '.jif',
-    '.jfif',
-    '.tiff',
-    '.bmp',
-    '.xml',
-    '.apk',
-    '.ipa',
-    '.ics',
-    '.svg',
-    '.gif',
-    '.csv',
-    '.ico',
-    '.p12',
-)
-ALLOWED_IMAGE_FORMATS = (
-    '.png',
-    '.jpg',
-    '.jpeg',
-    '.jpe',
-    '.jif',
-    '.jfif',
-    '.tiff',
-    '.bmp',
-    '.gif',
-    '.ico'
 )

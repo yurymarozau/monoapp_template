@@ -1,0 +1,38 @@
+# Coroutines
+celery==5.2.7
+
+# Database
+psycopg2-binary==2.9.5
+redis==4.4.2
+
+# Django
+Django==4.1.5
+django-celery-results==2.4.0
+django-otp==1.1.4
+django-simple-history==3.2.0
+django-storages==1.13.2
+djangorestframework==3.14.0
+djangorestframework-simplejwt==5.2.2
+drf-yasg==1.21.4
+
+# Logging
+sentry-sdk==1.14.0
+
+# Testing
+pytest==7.2.1
+
+# Media
+boto3==1.26.59
+whitenoise==6.3.0
+
+# Utils
+flake8==6.0.0
+flower==1.2.0
+gunicorn==20.1.0
+isort==5.12.0
+python-decouple==3.7
+
+# Websockets
+channels==4.0.0
+channels-redis==4.0.0
+daphne==4.0.0

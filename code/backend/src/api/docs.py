@@ -6,12 +6,12 @@ from rest_framework import authentication, permissions
 
 schema_view = get_schema_view(
     openapi.Info(
-        title='Monoapp Template API',
+        title='Monoapp template',
         default_version='v1',
     ),
     public=True,
-    authentication_classes=(authentication.SessionAuthentication,),
-    permission_classes=(permissions.IsAdminUser,),
+    authentication_classes=[authentication.SessionAuthentication],
+    permission_classes=[permissions.IsAdminUser],
 )
 
 

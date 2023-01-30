@@ -1,0 +1,134 @@
+version: '3.8'
+
+services:
+  api:
+    container_name: api
+    image: template-api
+    build:
+      context: ./code/backend
+      args:
+        APP_USER: ${APP_USER}
+        APP_DIR: ${APP_DIR}
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+      - ./code/backend/wait-for-it.sh:${APP_DIR}/wait-for-it.sh
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=${WFI_TIMEOUT}', '--',
+              'python3', 'manage.py', 'runserver', '0.0.0.0:8000']
+    ports:
+      - '8000:8000'
+    depends_on:
+      - db
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    volumes:
+      - redis_data:/data
+    env_file: ./.env
+    ports:
+      - '6379:6379'
+
+  db:
+    container_name: db
+    image: postgres:15.1-alpine
+    shm_size: 2g
+    privileged: true
+    volumes:
+      - ./code/backend/db/$DATABASE_ENVIRONMENT:/docker-entrypoint-initdb.d
+      - db_data:/var/lib/postgresql/data
+    env_file: ./.env
+    environment:
+      - POSTGRES_DB=${DATABASE_NAME}
+      - POSTGRES_USER=${DATABASE_USER}
+      - POSTGRES_PASSWORD=${DATABASE_PASSWORD}
+      - POSTGRES_HOST=${DATABASE_HOST}
+      - POSTGRES_PORT=${DATABASE_PORT}
+    ports:
+      - '5432:5432'
+
+  db-migrator:
+    container_name: db-migrator
+    image: template-api
+    build:
+      context: ./code/backend
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+      - ./code/backend/wait-for-it.sh:${APP_DIR}/wait-for-it.sh
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=${WFI_TIMEOUT}', '--',
+              'python3', 'manage.py', 'migrate']
+    depends_on:
+      - db
+      - redis
+
+  collectstatic:
+    container_name: collectstatic
+    image: template-api
+    build:
+      context: ./code/backend
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+      - ./code/backend/wait-for-it.sh:${APP_DIR}/wait-for-it.sh
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=${WFI_TIMEOUT}', '--',
+              'python3', 'manage.py', 'collectstatic', '--noinput']
+    depends_on:
+      - db
+      - redis
+
+  worker:
+    container_name: worker
+    image: template-api
+    build:
+      context: ./code/backend
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+      - ./code/backend/wait-for-it.sh:${APP_DIR}/wait-for-it.sh
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=${WFI_TIMEOUT}', '--',
+              'celery', '-A', 'config.celery', 'worker', '-Q', 'low']
+    depends_on:
+      - db
+      - redis
+
+  beat:
+    container_name: beat
+    image: template-api
+    build:
+      context: ./code/backend
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+      - ./code/backend/wait-for-it.sh:${APP_DIR}/wait-for-it.sh
+    env_file: ./.env
+    entrypoint: []
+    command: ['./wait-for-it.sh', '${DATABASE_HOST}:${DATABASE_PORT}', '--timeout=${WFI_TIMEOUT}', '--',
+              'celery', '-A', 'config.celery', 'beat', '-l', 'INFO']
+    depends_on:
+      - db
+      - redis
+
+  flower:
+    container_name: flower
+    image: template-api
+    build:
+      context: ./code/backend
+    volumes:
+      - ./code/backend/src/:${APP_DIR}/
+    env_file: ./.env
+    entrypoint: []
+    command: ['celery', '-A', 'config.celery.celery', 'flower']
+    ports:
+      - '5555:5555'
+    depends_on:
+      - redis
+
+volumes:
+  db_data:
+    name: template_db_data_$DATABASE_ENVIRONMENT
+  redis_data:

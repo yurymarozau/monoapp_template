@@ -10,9 +10,9 @@ SECRET_KEY = config('DJANGO_SECRET_KEY')
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(',')
 
-DEBUG = config('DEBUG', default=True, cast=bool)
+DEBUG = config('DEBUG', default=False, cast=bool)
 
-INSTALLED_APPS = (
+INSTALLED_APPS = [
     # Django apps
     'django.contrib.admin',
     'django.contrib.auth',
@@ -28,27 +28,22 @@ INSTALLED_APPS = (
     'rest_framework',
     'rest_framework_simplejwt',
 
-    'djoser',
-
     'channels',
 
     'simple_history',
 
-    'django_celery_beat',
     'django_celery_results',
-)
+]
 
 if DEBUG:
-    INSTALLED_APPS += (
+    INSTALLED_APPS += [
         'drf_yasg',
-    )
-
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -104,8 +99,8 @@ APPEND_SLASH = False
 ACCESS_TOKEN_LIFETIME = config('ACCESS_TOKEN_LIFETIME', cast=int)
 REFRESH_TOKEN_LIFETIME = config('REFRESH_TOKEN_LIFETIME', cast=int)
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(seconds=ACCESS_TOKEN_LIFETIME),
-    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(seconds=REFRESH_TOKEN_LIFETIME),
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=ACCESS_TOKEN_LIFETIME),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(minutes=REFRESH_TOKEN_LIFETIME),
     'ALGORITHM': 'HS256',
     'SIGNING_KEY': SECRET_KEY,
     'AUTH_HEADER_TYPES': ('JWT',)

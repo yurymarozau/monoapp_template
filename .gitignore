@@ -18,8 +18,6 @@ __pycache__/
 uploads/
 static/
 media/
-postgres/
-redis/
 
 # Compiled output
 dist/
@@ -51,3 +49,7 @@ npm-debug.log
 yarn-error.log
 testem.log
 typings/
+
+# Custom files
+.custom/
+*localhost.py

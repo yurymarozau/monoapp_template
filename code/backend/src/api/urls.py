@@ -9,9 +9,9 @@ from api.v1 import urls as v1_urls
 app_name = 'api'
 
 urlpatterns = [
-    path('', views.ApiInfo.as_view()),
     path('v1/', include(v1_urls.urlpatterns)),
     path('health-check/', views.HealthCheck.as_view()),
+    path('', views.ApiInfo.as_view()),
 ]
 
 if settings.ENABLE_DOCS:
