@@ -1,10 +1,6 @@
 import datetime
-import os
 
 from decouple import config
-
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = config('DJANGO_SECRET_KEY')
 
@@ -41,6 +37,8 @@ if DEBUG:
     ]
 
 MIDDLEWARE = [
+    'apps.common.middlewares.MonitoringLongTimeQueriesMiddleware',
+    'apps.common.middlewares.TrailingSlashAppendingMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -48,6 +46,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'apps.common.middlewares.ValidationErrorsToSentryMiddleware',
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -94,11 +94,10 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 AUTH_USER_MODEL = 'apps.User'
 
-APPEND_SLASH = False
-
 ACCESS_TOKEN_LIFETIME = config('ACCESS_TOKEN_LIFETIME', cast=int)
 REFRESH_TOKEN_LIFETIME = config('REFRESH_TOKEN_LIFETIME', cast=int)
 SIMPLE_JWT = {
+    'USER_ID_FIELD': 'uuid',
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=ACCESS_TOKEN_LIFETIME),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(minutes=REFRESH_TOKEN_LIFETIME),
     'ALGORITHM': 'HS256',

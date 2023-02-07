@@ -1,10 +1,9 @@
-from django.urls import include, path
 from django.conf import settings
+from django.urls import include, path
 
 from api import views
 from api.docs import urlpatterns as docs_urlpatterns
 from api.v1 import urls as v1_urls
-
 
 app_name = 'api'
 

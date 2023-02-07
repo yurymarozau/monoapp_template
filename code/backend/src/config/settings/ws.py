@@ -1,6 +1,5 @@
 from decouple import config
 
-
 ASGI_APPLICATION = 'config.routings.application'
 
 CHANNEL_LAYER_DB = config('CHANNEL_LAYER_DB')

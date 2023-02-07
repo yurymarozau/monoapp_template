@@ -1,6 +1,5 @@
 from decouple import config
 
-
 DATABASES = {
     'default': {
         'ENGINE': config('DATABASE_ENGINE'),

@@ -1,0 +1,5 @@
+[run]
+omit = config/*,tests/*
+
+[report]
+omit = config/*,tests/*
